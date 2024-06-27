@@ -90,6 +90,7 @@ public class ChatServer {
                 String response;
                 if (userCredentialsMap.containsKey(username) && userCredentialsMap.get(username).equals(password)) {
                     activeUsersSet.add(username); // 添加到在线用户列表
+                    logUserActivity(username, "登录");
                     response = "{\"success\": true}";
                 } else {
                     response = "{\"success\": false}";
@@ -173,6 +174,7 @@ public class ChatServer {
                 String response;
                 if (activeUsersSet.contains(username)) {
                     activeUsersSet.remove(username); // 从在线用户列表中移除
+                    logUserActivity(username, "退出");
                     response = "{\"success\": true}";
                 } else {
                     response = "{\"success\": false}";
@@ -206,6 +208,16 @@ public class ChatServer {
         httpExchange.sendResponseHeaders(200, response.getBytes().length);
         try (OutputStream os = httpExchange.getResponseBody()) {
             os.write(response.getBytes());
+        }
+    }
+
+    private static void logUserActivity(String username, String activity) {
+        try (FileWriter fw = new FileWriter("logs.txt", true);
+                BufferedWriter bw = new BufferedWriter(fw);
+                PrintWriter out = new PrintWriter(bw)) {
+            out.println(username + " " + activity + " " + new Date());
+        } catch (IOException e) {
+            System.err.println("日志记录失败: " + e.getMessage());
         }
     }
 }
